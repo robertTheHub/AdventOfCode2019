@@ -1,16 +1,16 @@
 class VM():
-    def __init__(self, phase, input, code_file):
+    def __init__(self, phase, inside, code_file):
         self.phase = phase
         self.code = self.parse_code(code_file)
         self.counter=0
         self.stopped = False
         self.done = False
-        self.input = input
+        self.input = inside
         self.output = None
 
     def parse_code(self, code_file):
         with open(code_file) as f:
-            return f.readline()
+            return f.readline().split(",")
 
     def get_function(self):
         return self.code[self.counter]
@@ -27,9 +27,9 @@ class VM():
         self.counter += value
 
     def get_position(self, position):
-        if position is str:
+        if isinstance(position, str):
             return self.code[int(position)]
-        if position is int:
+        if isinstance(position, int):
             return self.code[position]
 
     def set_value(self, input):
@@ -56,7 +56,7 @@ class VM():
 
     def run(self):
         valid = {'1', '2', '5', '6', '7', '8'}
-        while self.counter < len(self.code) and not self.stopped and self.done:
+        while self.counter < len(self.code) and not self.stopped and not self.done:
             function = self.get_function()
             if function[-1] in valid:
                 try:
@@ -65,7 +65,7 @@ class VM():
                     pass
                 try:
                     first = self.get_position(self.get_argument(1))
-                except Exception:
+                except Exception as e:
                     pass
                 if len(function) >= 4:
                     if function[-4] == '1':
@@ -95,7 +95,7 @@ class VM():
                     else:
                         self.set_value(0)
                     self.inc_counter(4)
-                elif lst[i][-1] == '8':
+                elif function[-1] == '8':
                     if first == second:
                         self.set_value(1)
                     else:
@@ -123,7 +123,18 @@ def permutations(values):
         for i in perms:
             output.append(values[j] + i)
     return output
-            
+
+if __name__ == "__main__":
+   vm = VM("18", "18", "test5.txt")
+#"../Day5/input.txt")
+   while not vm.done:
+       vm.run()
+       if vm.stopped:
+           print(vm.output)
+       vm.set_input("18")
+   print(vm.output) 
+   
+"""
 maximum = 0
 winner = []
 vals = "56789"
@@ -166,3 +177,4 @@ for perm in perms:
         winner = perm
         maximum = int(output)
 print(winner, maximum)
+"""
