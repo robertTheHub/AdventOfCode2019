@@ -2,7 +2,7 @@ class VM():
     def __init__(self, phase, inside, code_file):
         self.phase = phase
         self.code = self.parse_code(code_file)
-        self.counter=0
+        self.counter = 0
         self.stopped = False
         self.done = False
         self.input = inside
@@ -10,18 +10,18 @@ class VM():
 
     def parse_code(self, code_file):
         with open(code_file) as f:
-            return f.readline().split(",")
+            return f.readline().strip().split(",")
 
     def get_function(self):
         return self.code[self.counter]
 
     def get_argument(self, position):
         if position == 1:
-            return self.code[self.counter+1]
+            return self.code[self.counter + 1]
         elif position == 2:
-            return self.code[self.counter+2]
+            return self.code[self.counter + 2]
         else:
-            return self.code[self.counter+3]
+            return self.code[self.counter + 3]
 
     def inc_counter(self, value):
         self.counter += value
@@ -33,7 +33,7 @@ class VM():
             return self.code[position]
 
     def set_value(self, input):
-        self.code[int(self.get_argument(3))] = input
+        self.code[int(self.get_argument(3))] = str(input)
 
     def set_counter(self, value):
         self.counter = value
@@ -52,7 +52,6 @@ class VM():
             self.phase = None
         else:
             self.code[int(self.code[self.counter + 1])] = self.input
-
 
     def run(self):
         valid = {'1', '2', '5', '6', '7', '8'}
@@ -90,7 +89,7 @@ class VM():
                     else:
                         self.inc_counter(3)
                 elif function[-1] == '7':
-                    if first < second:
+                    if int(first) < int(second):
                         self.set_value(1)
                     else:
                         self.set_value(0)
@@ -106,75 +105,47 @@ class VM():
                 self.inc_counter(2)
             elif function[-1] == '4':
                 if function[0] == '1':
-                    self.set_output(self.counter+1)
+                    self.set_output(self.counter + 1)
                 else:
-                    self.set_output(self.get_position(self.counter+1))
+                    self.set_output(self.get_position(self.counter + 1))
                 self.inc_counter(2)
                 self.stopped = True
             else:
                 self.done = True
+
 
 def permutations(values):
     if len(values) == 1:
         return [values]
     output = []
     for j in range(len(values)):
-        perms = permutations(values[:j]+values[j+1:])
+        perms = permutations(values[:j] + values[j + 1:])
         for i in perms:
             output.append(values[j] + i)
     return output
 
+
 if __name__ == "__main__":
-   vm = VM("18", "18", "test5.txt")
-#"../Day5/input.txt")
-   while not vm.done:
-       vm.run()
-       if vm.stopped:
-           print(vm.output)
-       vm.set_input("18")
-   print(vm.output) 
-   
-"""
-maximum = 0
-winner = []
-vals = "56789"
-perms = permutations(vals)
-perms = ["98765"] # 9 7 8 5 6 => 18216 ; 98765=>139629729
-for perm in perms:
-    output = "0"
-    paths = {}
-    with open("input.txt") as f:
-         text = f.readline()
-         for val in vals:
-             lst = text.split(',')
-             paths[val] = (lst, 0, val)
-    temp_perm = perm
-    count = 0
-    while True:
-        if not perm:
-            break
+    maximum = 0
+    winner = []
+    vals = "56789"
+    perms = permutations(vals)
+    for perm in perms:
+        output = "0"
+        vms = {}
         for val in perm:
-            if count != 0:
-                phase = output
-            else:
-                phase = val
-            temp = runner(phase, output, paths[val][0], paths[val][1], paths)
-            if temp is None:
-                break
-            elif temp == "99":
-                i = perm.index(val)
-                temp_perm = temp_perm[:i] + temp_perm[i+1:]
-            else:
-                output = temp
-        perm = temp_perm
-        count = 1
-        print(temp)
-        if temp is None:
-            break
-#        if temp == "99":
-#            break
-    if int(output) > maximum:
-        winner = perm
-        maximum = int(output)
-print(winner, maximum)
-"""
+            vms[val] = VM(val, output, "input1.txt")
+            vms[val].run()
+            output = vms[val].output
+        while len(vms.keys()):
+            for val in perm:
+                vms[val].set_input(output)
+                vms[val].run()
+                output = vms[val].output
+                if vms[val].done:
+                    vms.pop(val)
+        if int(output) > maximum:
+            winner = perm
+            maximum = int(output)
+    print(winner, maximum)
+
