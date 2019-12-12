@@ -99,24 +99,31 @@ class VM:
         while self.is_runnable():
             function = self.get_function()
             if function[-1] in valid:
-                third = self.get_argument(3)
-                second = self.get_positionly(2)
-                first = self.get_positionly(1)
                 if len(function) >= 5:
                     if function[-5] == '1':
                         third = self.get_argument(3)
                     elif function[-5] == '2':
                         third = self.get_relative_position(3)
+                else:
+                    third = self.get_argument(3)
                 if len(function) >= 4:
                     if function[-4] == '1':
                         second = self.get_argument(2)
                     elif function[-4] == '2':
                         second = self.get_relatively(2)
+                    elif function[-4] == '0':
+                        first = self.get_positionly(2)
+                else:
+                    second = self.get_positionly(2)
                 if len(function) >= 3:
                     if function[-3] == '1':
                         first = self.get_argument(1)
                     elif function[-3] == '2':
                         first = self.get_relatively(1)
+                    elif function[-3] == '0':
+                        first = self.get_positionly(1)
+                else:
+                    first = self.get_positionly(1)
                 if function[-1] == '1':
                     self.put_in_code(third, str(int(first) + int(second)))
                     self.inc_counter(4)
