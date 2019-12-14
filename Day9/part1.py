@@ -98,87 +98,122 @@ class VM:
         valid = {'1', '2', '5', '6', '7', '8'}
         while self.is_runnable():
             function = self.get_function()
+            counter = self.counter
             if function[-1] in valid:
                 if len(function) >= 5:
                     if function[-5] == '1':
                         third = self.get_argument(3)
+                        debug_third = str(third)
                     elif function[-5] == '2':
                         third = self.get_relative_position(3)
+                        debug_third = "(" + self.get_argument(3) + ")"
                 else:
                     third = self.get_argument(3)
+                    debug_third = "[" + str(third) + "]"
                 if len(function) >= 4:
                     if function[-4] == '1':
                         second = self.get_argument(2)
+                        debug_second = str(second)
                     elif function[-4] == '2':
                         second = self.get_relatively(2)
+                        debug_second = "(" + str(self.get_argument(2)) + ")"
                     elif function[-4] == '0':
-                        first = self.get_positionly(2)
+                        second = self.get_positionly(2)
+                        debug_second = "[" + str(self.get_argument(2)) + "]"
                 else:
                     second = self.get_positionly(2)
+                    debug_second = "[" + str(self.get_argument(2)) + "]"
                 if len(function) >= 3:
                     if function[-3] == '1':
                         first = self.get_argument(1)
+                        debug_first = str(first)
                     elif function[-3] == '2':
                         first = self.get_relatively(1)
+                        debug_first = "(" + str(self.get_argument(1)) + ")"
                     elif function[-3] == '0':
                         first = self.get_positionly(1)
+                        debug_first = "[" + str(self.get_argument(1)) + "]"
                 else:
                     first = self.get_positionly(1)
+                    debug_first = "[" + str(self.get_argument(1)) + "]"
                 if function[-1] == '1':
                     self.put_in_code(third, str(int(first) + int(second)))
                     self.inc_counter(4)
+                    name = 'add'
                 elif function[-1] == '2':
                     self.put_in_code(third, str(int(first) * int(second)))
                     self.inc_counter(4)
+                    name = 'mul'
                 elif function[-1] == '5':
                     if int(first):
                         self.set_counter(int(second))
                     else:
                         self.inc_counter(3)
+                    name = 'jmpnz'
+                    debug_third = ''
                 elif function[-1] == '6':
                     if not int(first):
                         self.set_counter(int(second))
                     else:
                         self.inc_counter(3)
+                    name = 'jmpz'
+                    debug_third = ''
                 elif function[-1] == '7':
                     if int(first) < int(second):
                         self.put_in_code(third, "1")
                     else:
                         self.put_in_code(third, "0")
                     self.inc_counter(4)
+                    name = 'slt'
                 elif function[-1] == '8':
                     if first == second:
                         self.put_in_code(third, "1")
                     else:
                         self.put_in_code(third, "0")
                     self.inc_counter(4)
-            elif function[-1] == '3':
-                if function[0] == '2':
-                    self.use_input(self.get_relative_position(1))
-                else:
-                    self.use_input(self.get_argument(1))
-                self.inc_counter(2)
-            elif function[-1] == '4':
-                if function[0] == '1':
-                    self.set_output(self.get_argument(1))
-                elif function[0] == '2':
-                    self.set_output(self.get_relatively(1))
-                else:
-                    self.set_output(self.get_positionly(1))
-                self.inc_counter(2)
-                self.stopped = True
-            elif function[-2:] == '99':
-                self.done = True
-            elif function[-1] == '9':
-                if function[0] == '1':
-                    self.set_base(self.get_argument(1))
-                elif function[0] == '2':
-                    self.set_base(self.get_relatively(1))
-                else:
-                    self.set_base(self.get_positionly(1))
-                self.inc_counter(2)
+                    name = 'seq'
+                #print(counter, " : ", name, debug_first, debug_second, debug_third)
             else:
-                raise ValueError
+                if function[-1] == '3':
+                    if function[0] == '2':
+                        self.use_input(self.get_relative_position(1))
+                        debug_first = "(" + str(self.get_argument(1)) + ")"
+                    else:
+                        self.use_input(self.get_argument(1))
+                        debug_first = self.get_argument(1)
+                    self.inc_counter(2)
+                    name = 'in'
+                elif function[-1] == '4':
+                    if function[0] == '1':
+                        self.set_output(self.get_argument(1))
+                        debug_first = self.get_argument(1)
+                    elif function[0] == '2':
+                        self.set_output(self.get_relatively(1))
+                        debug_first = "(" + str(self.get_argument(1)) + ")"
+                    else:
+                        self.set_output(self.get_positionly(1))
+                        debug_first = "[" + str(self.get_argument(1)) + "]"
+                    self.inc_counter(2)
+                    name = 'out'
+                    self.stopped = True
+                elif function[-2:] == '99':
+                    self.done = True
+                    name = 'halt'
+                elif function[-1] == '9':
+                    if function[0] == '1':
+                        self.set_base(self.get_argument(1))
+                        debug_first = self.get_argument(1)
+                    elif function[0] == '2':
+                        self.set_base(self.get_relatively(1))
+                        debug_first = "(" + str(self.get_relative_position(1)) + ")"
+                    else:
+                        self.set_base(self.get_positionly(1))
+                        debug_first = "[" + str(self.get_argument(1)) + "]"
+                    self.inc_counter(2)
+                    name = 'arb'
+                else:
+                    raise ValueError
+                #print(counter, ": ", name, debug_first)
             self.is_done()
 
 
